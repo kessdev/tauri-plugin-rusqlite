@@ -21,11 +21,11 @@ pub fn execute_update(
 
     let mut statement = connection
         .prepare(&sql)
-        .or_else(|error| Err(Error::DatabaseError(error.to_string())))?;
+        .map_err(|error| Error::Database(error.to_string()))?;
 
     statement
         .execute(params.as_slice())
-        .or_else(|error| Err(Error::DatabaseError(error.to_string())))?;
+        .map_err(|error| Error::Database(error.to_string()))?;
 
     Ok(())
 }
@@ -75,7 +75,7 @@ mod tests {
             assert_eq!(row.get_ref(3).unwrap().as_str().unwrap(), "test1");
             assert_eq!(row.get_ref(4).unwrap().as_blob().unwrap(), &[1, 2, 3]);
         } else {
-            assert!(false);
+            panic!();
         }
     }
 
@@ -120,7 +120,7 @@ mod tests {
             assert_eq!(row.get_ref(3).unwrap().as_str().unwrap(), "test3");
             assert_eq!(row.get_ref(4).unwrap().as_blob().unwrap(), &[7, 8, 9]);
         } else {
-            assert!(false);
+            panic!();
         }
     }
 }

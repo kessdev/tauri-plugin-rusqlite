@@ -3,15 +3,15 @@ use serde::{Serialize, Serializer};
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(
-        "Please run the init_database() method first to establish a connection to the database."
+        "Please run the open_in_memory or open_in_path method first to establish a connection to the database."
     )]
-    ConnectionError(),
+    Connection(),
     #[error("Database error: {0}")]
-    DatabaseError(String),
+    Database(String),
     #[error("Migration error: {0}")]
-    MigrationError(String),
+    Migration(String),
     #[error("Opening connection error: {0}")]
-    OpeningConnectionError(String),
+    OpeningConnection(String),
 }
 
 impl Serialize for Error {

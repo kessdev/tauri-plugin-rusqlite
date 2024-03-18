@@ -8,18 +8,16 @@ pub fn execute_migration(connection: &Connection, migrations: Migrations) -> Res
     let migration_table_sql = "CREATE TABLE IF NOT EXISTS migrations_history (id INTEGER PRIMARY KEY, name TEXT NOT NULL, hash TEXT NOT NULL)";
     connection
         .execute_batch(migration_table_sql)
-        .or_else(|error| Err(Error::DatabaseError(error.to_string())))?;
+        .map_err(|error| Error::Database(error.to_string()))?;
 
     let mut statement = connection
-        .prepare(&format!(
-            "SELECT name, hash FROM migrations_history ORDER BY id"
-        ))
-        .or_else(|error| Err(Error::DatabaseError(error.to_string())))?;
+        .prepare("SELECT name, hash FROM migrations_history ORDER BY id")
+        .map_err(|error| Error::Database(error.to_string()))?;
 
     let mut migrations_iterator = migrations.iter();
     let mut rows = statement
         .query([])
-        .or_else(|error| Err(Error::DatabaseError(error.to_string())))?;
+        .map_err(|error| Error::Database(error.to_string()))?;
 
     while let Some(row) = rows.next().unwrap() {
         let name_value = row.get_ref(0).unwrap();
@@ -33,46 +31,38 @@ pub fn execute_migration(connection: &Connection, migrations: Migrations) -> Res
                 let sql = migration.get("sql").unwrap().as_str().unwrap();
                 let hash = calculate_hash(&sql.to_string());
                 if name_value.as_str().unwrap() != name || hash_value.as_str().unwrap() != hash {
-                    return Err(Error::MigrationError(format!(
+                    return Err(Error::Migration(format!(
                         "The migration {} has been modified",
                         name
                     )));
                 }
             }
             None => {
-                return Err(Error::MigrationError(
+                return Err(Error::Migration(
                     "The migration list has been modified".to_string(),
                 ));
             }
         }
     }
 
-    while let Some(migration) = migrations_iterator.next() {
+    for migration in migrations_iterator {
         let name = migration.get("name").unwrap().as_str().unwrap();
         let sql = migration.get("sql").unwrap().as_str().unwrap();
         let hash = calculate_hash(&sql.to_string());
 
-        connection.execute_batch(sql).or_else(|error| {
-            Err(Error::MigrationError(format!(
-                "Error executing migration: {}. {}",
-                name,
-                error.to_string()
-            )))
+        connection.execute_batch(sql).map_err(|error| {
+            Error::Migration(format!("Error executing migration: {}. {}", name, error))
         })?;
 
         let mut statement = connection
             .prepare("INSERT INTO migrations_history (name, hash) VALUES (:name, :hash)")
-            .or_else(|error| {
-                Err(Error::MigrationError(format!(
-                    "Error preparing migration: {}. {}",
-                    name,
-                    error.to_string()
-                )))
+            .map_err(|error| {
+                Error::Migration(format!("Error preparing migration: {}. {}", name, error))
             })?;
 
         statement
             .execute(&[(":name", name), (":hash", &&hash)])
-            .or_else(|error| Err(Error::MigrationError(error.to_string())))?;
+            .map_err(|error| Error::Migration(error.to_string()))?;
     }
 
     Ok(())
@@ -124,7 +114,7 @@ mod tests {
             let count = row.get_ref(0).unwrap();
             assert_eq!(count.as_i64().unwrap(), 2);
         } else {
-            assert!(false);
+            panic!();
         }
 
         let sql = "SELECT * FROM migrations_history WHERE id = ?1";
@@ -140,7 +130,7 @@ mod tests {
                 calculate_hash(&create_table.to_string())
             );
         } else {
-            assert!(false);
+            panic!();
         }
 
         let mut statement = connection.prepare(sql).unwrap();
@@ -154,7 +144,7 @@ mod tests {
                 calculate_hash(&insert_data.to_string())
             );
         } else {
-            assert!(false);
+            panic!();
         }
     }
 }

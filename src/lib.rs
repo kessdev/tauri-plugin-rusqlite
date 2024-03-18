@@ -22,7 +22,7 @@ struct ConfigState(Mutex<HashMap<String, Connection>>);
 #[command]
 async fn open_in_memory(state: State<'_, ConfigState>, name: String) -> Result<()> {
     let connection = Connection::open_in_memory()
-        .or_else(|error| Err(Error::OpeningConnectionError(error.to_string())))?;
+        .map_err(|error| Error::OpeningConnection(error.to_string()))?;
 
     insert_connection(state, connection, name)
 }
@@ -30,7 +30,7 @@ async fn open_in_memory(state: State<'_, ConfigState>, name: String) -> Result<(
 #[command]
 async fn open_in_path(state: State<'_, ConfigState>, path: String) -> Result<()> {
     let connection = Connection::open_with_flags(path.clone(), OpenFlags::default())
-        .or_else(|error| Err(Error::OpeningConnectionError(error.to_string())))?;
+        .map_err(|error| Error::OpeningConnection(error.to_string()))?;
 
     insert_connection(state, connection, path)
 }
@@ -59,7 +59,7 @@ async fn migration(
     let connections = state.0.lock().unwrap();
     let connection = match connections.get(&name) {
         Some(connection) => connection,
-        None => return Err(Error::ConnectionError()),
+        None => return Err(Error::Connection()),
     };
 
     execute_migration(connection, migrations)
@@ -75,7 +75,7 @@ async fn update(
     let connections = state.0.lock().unwrap();
     let connection = match connections.get(&name) {
         Some(connection) => connection,
-        None => return Err(Error::ConnectionError()),
+        None => return Err(Error::Connection()),
     };
 
     execute_update(connection, sql, parameters)

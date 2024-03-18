@@ -2,7 +2,6 @@ use crate::{
     error::Error,
     types::{Result, SQLParameter},
 };
-use md5;
 use rusqlite::types::Value as SqliteValue;
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
@@ -45,11 +44,7 @@ pub fn create_parameters(parameters: &HashMap<String, JsonValue>) -> Result<Vec<
                 )),
             ));
         } else {
-            return Err(Error::DatabaseError(format!(
-                "({}: {})",
-                name.to_string(),
-                value.to_string()
-            )));
+            return Err(Error::Database(format!("({}: {})", name, value)));
         }
     }
     Ok(params)
