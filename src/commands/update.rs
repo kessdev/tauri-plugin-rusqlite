@@ -5,17 +5,26 @@ use rusqlite::{Connection, ToSql};
 use serde_json::Value as JsonValue;
 
 use crate::common::create_parameters;
-use crate::types::Result;
 use crate::error::Error;
+use crate::types::Result;
 
-pub fn execute_update(connection: &Connection, sql: String, parameters: HashMap<String, JsonValue>) -> Result<()> {
+pub fn execute_update(
+    connection: &Connection,
+    sql: String,
+    parameters: HashMap<String, JsonValue>,
+) -> Result<()> {
     let sql_parameters = create_parameters(&parameters)?;
-    let params = sql_parameters.iter().map(|(name, value)| (name.as_str(), value.as_ref())).collect::<Vec<(&str, &dyn ToSql)>>();
+    let params = sql_parameters
+        .iter()
+        .map(|(name, value)| (name.as_str(), value.as_ref()))
+        .collect::<Vec<(&str, &dyn ToSql)>>();
 
-    let mut statement = connection.prepare(&sql)
+    let mut statement = connection
+        .prepare(&sql)
         .or_else(|error| Err(Error::DatabaseError(error.to_string())))?;
 
-    statement.execute(params.as_slice())
+    statement
+        .execute(params.as_slice())
         .or_else(|error| Err(Error::DatabaseError(error.to_string())))?;
 
     Ok(())
@@ -38,9 +47,22 @@ mod tests {
 
         let mut parameters = HashMap::new();
         parameters.insert(":integer_value".to_string(), JsonValue::Number(1.into()));
-        parameters.insert(":real_value".to_string(), JsonValue::Number(Number::from_f64(1.1).unwrap()));
-        parameters.insert(":text_value".to_string(), JsonValue::String("test1".to_string()));
-        parameters.insert(":blob_value".to_string(), JsonValue::Array(vec![JsonValue::Number(1.into()), JsonValue::Number(2.into()), JsonValue::Number(3.into())]));
+        parameters.insert(
+            ":real_value".to_string(),
+            JsonValue::Number(Number::from_f64(1.1).unwrap()),
+        );
+        parameters.insert(
+            ":text_value".to_string(),
+            JsonValue::String("test1".to_string()),
+        );
+        parameters.insert(
+            ":blob_value".to_string(),
+            JsonValue::Array(vec![
+                JsonValue::Number(1.into()),
+                JsonValue::Number(2.into()),
+                JsonValue::Number(3.into()),
+            ]),
+        );
         execute_update(&connection, sql.to_string(), parameters).unwrap();
 
         let sql = "SELECT * FROM test WHERE id = :id";
@@ -70,9 +92,22 @@ mod tests {
         let mut parameters = HashMap::new();
         parameters.insert(":id".to_string(), JsonValue::Number(1.into()));
         parameters.insert(":integer_value".to_string(), JsonValue::Number(3.into()));
-        parameters.insert(":real_value".to_string(), JsonValue::Number(Number::from_f64(3.3).unwrap()));
-        parameters.insert(":text_value".to_string(), JsonValue::String("test3".to_string()));
-        parameters.insert(":blob_value".to_string(), JsonValue::Array(vec![JsonValue::Number(7.into()), JsonValue::Number(8.into()), JsonValue::Number(9.into())]));
+        parameters.insert(
+            ":real_value".to_string(),
+            JsonValue::Number(Number::from_f64(3.3).unwrap()),
+        );
+        parameters.insert(
+            ":text_value".to_string(),
+            JsonValue::String("test3".to_string()),
+        );
+        parameters.insert(
+            ":blob_value".to_string(),
+            JsonValue::Array(vec![
+                JsonValue::Number(7.into()),
+                JsonValue::Number(8.into()),
+                JsonValue::Number(9.into()),
+            ]),
+        );
         execute_update(&connection, sql.to_string(), parameters).unwrap();
 
         let sql = "SELECT * FROM test WHERE id = :id";

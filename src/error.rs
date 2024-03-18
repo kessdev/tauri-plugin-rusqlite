@@ -2,12 +2,14 @@ use serde::{Serialize, Serializer};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Please run the init_database() method first to establish a connection to the database.")]
+    #[error(
+        "Please run the init_database() method first to establish a connection to the database."
+    )]
     ConnectionError(),
     #[error("Database error: {0}")]
-    DatabaseError (String),
+    DatabaseError(String),
     #[error("Migration error: {0}")]
-    MigrationError (String),
+    MigrationError(String),
     #[error("Opening connection error: {0}")]
     OpeningConnectionError(String),
 }
