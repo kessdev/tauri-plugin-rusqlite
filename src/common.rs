@@ -2,7 +2,7 @@ use crate::{
     error::Error,
     types::{Result, SQLParameter},
 };
-use rusqlite::types::Value as SqliteValue;
+use rusqlite::{types::Value as SqliteValue, Statement};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 
@@ -48,4 +48,12 @@ pub fn create_parameters(parameters: &HashMap<String, JsonValue>) -> Result<Vec<
         }
     }
     Ok(params)
+}
+
+pub fn get_column_names(statement: &Statement<'_>) -> Vec<String> {
+    let mut column_names = Vec::<String>::new();
+    for name in statement.column_names() {
+        column_names.push(name.to_string());
+    }
+    column_names
 }

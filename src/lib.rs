@@ -1,5 +1,5 @@
-use crate::types::Result;
-use commands::{migration::execute_migration, update::execute_update};
+use crate::types::{Result, ResultList};
+use commands::{migration::execute_migration, select::execute_select, update::execute_update};
 use error::Error;
 use rusqlite::{Connection, OpenFlags};
 use serde_json::Value as JsonValue;
@@ -81,6 +81,22 @@ async fn update(
     execute_update(connection, sql, parameters)
 }
 
+#[command]
+async fn select(
+    state: State<'_, ConfigState>,
+    name: String,
+    sql: String,
+    parameters: HashMap<String, JsonValue>,
+) -> Result<ResultList> {
+    let connections = state.0.lock().unwrap();
+    let connection = match connections.get(&name) {
+        Some(connection) => connection,
+        None => return Err(Error::Connection()),
+    };
+
+    execute_select(connection, sql, parameters)
+}
+
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("rusqlite")
@@ -88,7 +104,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             open_in_memory,
             open_in_path,
             migration,
-            update
+            update,
+            select
         ])
         .setup(|app| {
             app.manage(ConfigState::default());

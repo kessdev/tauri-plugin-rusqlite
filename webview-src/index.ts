@@ -18,8 +18,13 @@ export default class Rusqlite {
   async migration(migrations: Migration[]): Promise<void> {
     return await invoke('plugin:rusqlite|migration', {name: this.name, migrations});
   }
+  
   async update(sql: string, parameters: Map<string, any>): Promise<void> {
     return await invoke('plugin:rusqlite|update', {name: this.name, sql, parameters});
+  }
+
+  async select(sql: string, parameters:Map<string, Object>): Promise<any[]> {
+    return await invoke('plugin:rusqlite|select', {name: this.name, sql, parameters});
   }
 }
 
