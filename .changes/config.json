@@ -1,5 +1,5 @@
 {
-  "gitSiteUrl": "https://www.github.com/your-org/tauri-plugin-rusqlite/",
+  "gitSiteUrl": "https://www.github.com/kessdev/tauri-plugin-rusqlite/",
   "pkgManagers": {
     "rust": {
       "version": true,
