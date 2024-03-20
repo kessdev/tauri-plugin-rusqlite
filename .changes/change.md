@@ -3,4 +3,4 @@
 "tauri-plugin-rusqlite-api": "minor"
 ---
 
-Add select command.
+Add batch command.
