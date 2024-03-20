@@ -111,6 +111,18 @@ async fn batch(state: State<'_, ConfigState>, name: String, batch_sql: String) -
     execute_batch(connection, batch_sql)
 }
 
+#[command]
+async fn close(state: State<'_, ConfigState>, name: String) -> Result<()> {
+    let mut connections = state.0.lock().unwrap();
+    let connection = match connections.remove(&name) {
+        Some(connection) => connection,
+        None => return Err(Error::Connection()),
+    };
+
+    connection.close().map_err(|(_, error)| Error::ClosingConnection(error.to_string()))?;
+    Ok(())
+}
+
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("rusqlite")
@@ -120,7 +132,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             migration,
             update,
             select,
-            batch
+            batch,
+            close
         ])
         .setup(|app| {
             app.manage(ConfigState::default());
