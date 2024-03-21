@@ -68,8 +68,8 @@
           "pipe": true
         },
         {
-          "command": "yarn publish --access public",
-          "dryRunCommand": "npm publish --dry-run --access public",
+          "command": "npm publish --dry-run --access public",
+          "dryRunCommand": true,
           "pipe": true
         },
         {
