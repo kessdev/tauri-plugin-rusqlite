@@ -68,8 +68,8 @@
           "pipe": true
         },
         {
-          "command": "npm publish --dry-run --access public",
-          "dryRunCommand": true,
+          "command": "npm publish --access public",
+          "dryRunCommand": "npm publish --dry-run --access public",
           "pipe": true
         },
         {
