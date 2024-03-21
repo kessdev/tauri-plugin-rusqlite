@@ -54,16 +54,16 @@
     "javascript": {
       "version": true,
       "prepublish": [
-        "yarn install",
+        "npm install",
         {
-          "command": "echo '<details>\n<summary><em><h4>Yarn Install</h4></em></summary>\n\n```'",
+          "command": "echo '<details>\n<summary><em><h4>NPM Install</h4></em></summary>\n\n```'",
           "dryRunCommand": true,
           "pipe": true
         }
       ],
       "publish": [
         {
-          "command": "echo '<details>\n<summary><em><h4>Yarn Publish</h4></em></summary>\n\n```'",
+          "command": "echo '<details>\n<summary><em><h4>NPM Publish</h4></em></summary>\n\n```'",
           "dryRunCommand": true,
           "pipe": true
         },
