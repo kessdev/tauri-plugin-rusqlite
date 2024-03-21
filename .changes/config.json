@@ -3,6 +3,7 @@
   "pkgManagers": {
     "rust": {
       "version": true,
+      "getPublishedVersion": "cargo search ${ pkg.pkg } --limit 1 | sed -nE 's/^[^\"]*\"//; s/\".*//1p' -",
       "prepublish": [
         "sudo apt-get update",
         "sudo apt-get install -y webkit2gtk-4.0",
@@ -52,6 +53,14 @@
     },
     "javascript": {
       "version": true,
+      "prepublish": [
+        "yarn install",
+        {
+          "command": "echo '<details>\n<summary><em><h4>Yarn Install</h4></em></summary>\n\n```'",
+          "dryRunCommand": true,
+          "pipe": true
+        }
+      ],
       "publish": [
         {
           "command": "echo '<details>\n<summary><em><h4>Yarn Publish</h4></em></summary>\n\n```'",
