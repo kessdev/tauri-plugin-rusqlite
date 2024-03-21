@@ -1,6 +1,6 @@
 ---
-"tauri-plugin-rusqlite": "minor"
+"tauri-plugin-rusqlite": "patch"
 "tauri-plugin-rusqlite-api": "patch"
 ---
 
-Add close command.
+Add close command to tauri-plugin-rusqlite-api.
