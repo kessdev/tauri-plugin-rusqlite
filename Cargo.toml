@@ -1,8 +1,10 @@
 [package]
 name = "tauri-plugin-rusqlite"
 version = "0.4.1"
-authors = [ "You" ]
-description = ""
+authors = [ "Kess" ]
+description = "Tauri Plugin based on Rusqlite"
+license = "MIT"
+readme = "README.md"
 edition = "2021"
 rust-version = "1.60"
 exclude = [ "/examples", "/webview-dist", "/webview-src", "node_modules" ]
