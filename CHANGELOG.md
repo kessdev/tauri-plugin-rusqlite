@@ -1,5 +1,29 @@
 # Changelog
 
+## \[0.4.1]
+
+- [`13757b7`](https://www.github.com/kessdev/tauri-plugin-rusqlite/commit/13757b7980e17032f81c9aa0cd594371d86c9372) Add close command to tauri-plugin-rusqlite-api.
+
+### Dependencies
+
+- Upgraded to `tauri-plugin-rusqlite@0.4.1`
+
+## \[0.4.0]
+
+- [`13757b7`](https://www.github.com/kessdev/tauri-plugin-rusqlite/commit/13757b7980e17032f81c9aa0cd594371d86c9372) Add close command.
+
+### Dependencies
+
+- Upgraded to `tauri-plugin-rusqlite@0.4.0`
+
+## \[0.3.0]
+
+- [`13757b7`](https://www.github.com/your-org/tauri-plugin-rusqlite/commit/13757b7980e17032f81c9aa0cd594371d86c9372) Add batch command.
+
+### Dependencies
+
+- Upgraded to `tauri-plugin-rusqlite@0.3.0`
+
 ## \[0.2.0]
 
 - [`13757b7`](https://www.github.com/your-org/tauri-plugin-rusqlite/commit/13757b7980e17032f81c9aa0cd594371d86c9372) Add select command.

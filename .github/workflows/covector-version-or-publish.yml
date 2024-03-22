@@ -20,6 +20,9 @@ jobs:
       - name: cargo login
         run: cargo login ${{ secrets.ORG_CRATES_IO_TOKEN }}
 
+      - name: npm config
+        run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+
       - name: git config
         run: |
           git config --global user.name "${{ github.event.pusher.name }}"

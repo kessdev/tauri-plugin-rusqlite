@@ -1,5 +1,5 @@
 {
-  "gitSiteUrl": "https://www.github.com/your-org/tauri-plugin-rusqlite/",
+  "gitSiteUrl": "https://www.github.com/kessdev/tauri-plugin-rusqlite/",
   "pkgManagers": {
     "rust": {
       "version": true,
@@ -53,15 +53,22 @@
     },
     "javascript": {
       "version": true,
-      "getPublishedVersion": "npm view ${ pkgFile.pkg.name } version",
+      "prepublish": [
+        "npm install",
+        {
+          "command": "echo '<details>\n<summary><em><h4>NPM Install</h4></em></summary>\n\n```'",
+          "dryRunCommand": true,
+          "pipe": true
+        }
+      ],
       "publish": [
         {
-          "command": "echo '<details>\n<summary><em><h4>Yarn Publish</h4></em></summary>\n\n```'",
+          "command": "echo '<details>\n<summary><em><h4>NPM Publish</h4></em></summary>\n\n```'",
           "dryRunCommand": true,
           "pipe": true
         },
         {
-          "command": "yarn publish --access public --loglevel silly",
+          "command": "npm publish --access public",
           "dryRunCommand": "npm publish --dry-run --access public",
           "pipe": true
         },

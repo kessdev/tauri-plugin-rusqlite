@@ -30,6 +30,10 @@ export default class Rusqlite {
   async batch(batchSql: string): Promise<void> {
     return await invoke('plugin:rusqlite|batch', {name: this.name, batch_sql: batchSql});
   }
+
+  async close(): Promise<void> {
+    return await invoke('plugin:rusqlite|close', {name: this.name});
+  }
 }
 
 export interface Migration {
