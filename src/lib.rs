@@ -119,7 +119,9 @@ async fn close(state: State<'_, ConfigState>, name: String) -> Result<()> {
         None => return Err(Error::Connection()),
     };
 
-    connection.close().map_err(|(_, error)| Error::ClosingConnection(error.to_string()))?;
+    connection
+        .close()
+        .map_err(|(_, error)| Error::ClosingConnection(error.to_string()))?;
     Ok(())
 }
 

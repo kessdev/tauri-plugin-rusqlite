@@ -53,6 +53,7 @@
     },
     "javascript": {
       "version": true,
+      "getPublishedVersion": "npm view ${ pkgFile.pkg.name } version",
       "prepublish": [
         "npm install",
         {

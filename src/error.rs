@@ -13,7 +13,7 @@ pub enum Error {
     #[error("Opening connection error: {0}")]
     OpeningConnection(String),
     #[error("Closing connection error: {0}")]
-    ClosingConnection(String)
+    ClosingConnection(String),
 }
 
 impl Serialize for Error {
