@@ -1,6 +1,6 @@
 {
   "name": "tauri-plugin-rusqlite-api",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "author": "Kess",
   "description": "Tauri Plugin based on Rusqlite",
   "browser": "webview-dist/index.js",

@@ -23,7 +23,7 @@ export default class Rusqlite {
     return await invoke('plugin:rusqlite|update', {name: this.name, sql, parameters});
   }
 
-  async select(sql: string, parameters:Map<string, Object>): Promise<any[]> {
+  async select(sql: string, parameters:Map<string, any>): Promise<any[]> {
     return await invoke('plugin:rusqlite|select', {name: this.name, sql, parameters});
   }
 

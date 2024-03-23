@@ -5,7 +5,7 @@ export default class Rusqlite {
     static openInPath(path: string): Promise<Rusqlite>;
     migration(migrations: Migration[]): Promise<void>;
     update(sql: string, parameters: Map<string, any>): Promise<void>;
-    select(sql: string, parameters: Map<string, Object>): Promise<any[]>;
+    select(sql: string, parameters: Map<string, any>): Promise<any[]>;
     batch(batchSql: string): Promise<void>;
     close(): Promise<void>;
 }
