@@ -1,23 +1,86 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
 import Rusqlite from 'tauri-plugin-rusqlite-api'
+import { rusqliteOpenInMemory, rusqliteOpenInPath } from "./Database";
+import { appDataDir, resolve } from "@tauri-apps/api/path";
 
 function App() {
   const [id, setId] = useState(-1);
   const [list, setList] = useState<any>([]);
-  const [loadDemo, setLoadDemo] = useState(true);
   const [openDatabase, setOpenDatabase] = useState(false);
+  const [rusqlite, setRusqlite] = useState<Rusqlite | null>(null);
+  const [databasePath, setDatabasePath] = useState('');
 
-  let rusqlite: Rusqlite;
-  (async() => {
+  const openInMemory = async () => {
     try {
-      rusqlite = await Rusqlite.openInMemory("test.db");
-      setLoadDemo(false);
+      const rusqlite = await rusqliteOpenInMemory();
+      let scripts = [
+        { name: "create_table", sql: "CREATE TABLE test (id INTEGER PRIMARY KEY, integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB)" }
+      ];
+      await rusqlite.migration(scripts);
+      setOpenDatabase(true);
+      setRusqlite(rusqlite);
     } catch (err) {
-        console.log(err);
+      console.log(err);
     }
-  })();
+  }
+
+  const openInPath = async () => {
+    try {
+      const baseFolder = await appDataDir();
+      const databasePath = await resolve(baseFolder, "test.db");
+      setDatabasePath(databasePath);
+      const rusqlite = await rusqliteOpenInPath(databasePath);
+      let scripts = [
+        { name: "create_table", sql: "CREATE TABLE test (id INTEGER PRIMARY KEY, integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB)" }
+      ];
+      await rusqlite.migration(scripts);
+      setOpenDatabase(true);
+      setRusqlite(rusqlite);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const addData = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const target = e.target as HTMLFormElement;
+    if (rusqlite) {
+      await rusqlite.update("INSERT INTO test (integer_value, real_value, text_value, blob_value) VALUES (:integer_value, :real_value, :text_value, :blob_value)",
+        new Map([[":integer_value", parseInt(target.integer_value.value)],
+        [":real_value", parseFloat(target.real_value.value)],
+        [":text_value", target.text_value.value],
+        [":blob_value", Array.from(target.blob_value.value, (char: string) => char.charCodeAt(0))]
+        ])
+      );
+      const result = await rusqlite.select("SELECT last_insert_rowid() as id", new Map());
+      setId(result[0].id);
+      target.integer_value.value = "";
+      target.real_value.value = "";
+      target.text_value.value = "";
+      target.blob_value.value = "";
+    }
+  }
+
+  const showData = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (rusqlite) {
+      let result = await rusqlite.select("SELECT * FROM test", new Map());
+      setList(result);
+    }
+  }
+
+  const closeDatabase = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (rusqlite) {
+      await rusqlite.close();
+      setOpenDatabase(false);
+      setRusqlite(null);
+      setList([]);
+      setId(-1);
+    }
+  }
 
   return (
     <div className="container">
@@ -39,45 +102,22 @@ function App() {
 
         <div className="column">
           <p>Open Database</p>
-          <form 
-            onSubmit={async (e) => {
-              e.preventDefault();
-              let scripts = [
-                {name: "create_table", sql: "CREATE TABLE test (id INTEGER PRIMARY KEY, integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB)"}
-              ];
-              await rusqlite.migration(scripts);
-              setOpenDatabase(true);
-            }}
-          >
-            <button type="submit" disabled={loadDemo} >Open In Memory</button>
-          </form>
+          <button type="button" onClick={openInMemory} >Open In Memory</button>
+          <br></br>
+          <button type="button" onClick={openInPath}>Open In Path</button>
+          <br></br>
+          <span>Open in: {databasePath}</span>
         </div>
 
         <div className="column">
           <p>Add data</p>
-          <form 
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const target = e.target as HTMLFormElement;
-              await rusqlite.update("INSERT INTO test (integer_value, real_value, text_value, blob_value) VALUES (:integer_value, :real_value, :text_value, :blob_value)", 
-                new Map([[":integer_value", parseInt(target.integer_value.value)], 
-                  [":real_value", parseFloat(target.real_value.value)], 
-                  [":text_value", target.text_value.value],
-                  [":blob_value", Array.from(target.blob_value.value, (char: string) => char.charCodeAt(0))]
-                ])
-              );
-              const result = await rusqlite.select("SELECT last_insert_rowid() as id", new Map());
-              setId(result[0].id);
-              target.integer_value.value = "";
-              target.real_value.value = "";
-              target.text_value.value = "";
-              target.blob_value.value = "";
-            }}
+          <form
+            onSubmit={addData}
           >
-            <input type="text" placeholder="Integer" name="integer_value" disabled={!openDatabase} /> <br/>
-            <input type="text" placeholder="Real" name="real_value" disabled={!openDatabase} /> <br/>
-            <input type="text" placeholder="Text" name="text_value" disabled={!openDatabase} /> <br/>
-            <input type="text" placeholder="Blob" name="blob_value" disabled={!openDatabase} /> <br/>
+            <input type="text" placeholder="Integer" name="integer_value" disabled={!openDatabase} /> <br />
+            <input type="text" placeholder="Real" name="real_value" disabled={!openDatabase} /> <br />
+            <input type="text" placeholder="Text" name="text_value" disabled={!openDatabase} /> <br />
+            <input type="text" placeholder="Blob" name="blob_value" disabled={!openDatabase} /> <br />
             <button type="submit" disabled={!openDatabase}>Insert</button>
             <span>{id > 0 ? 'Last id: ' + id : ''}</span>
           </form>
@@ -85,12 +125,8 @@ function App() {
 
         <div className="column">
           <p>Show data</p>
-          <form 
-            onSubmit={async (e) => {
-              e.preventDefault();
-              let result = await rusqlite.select("SELECT * FROM test", new Map());
-              setList(result);
-            }}
+          <form
+            onSubmit={showData}
           >
             <button type="submit" disabled={!openDatabase}>Select</button>
           </form>
@@ -98,14 +134,8 @@ function App() {
 
         <div className="column">
           <p>Close Database</p>
-          <form 
-            onSubmit={async (e) => {
-              e.preventDefault();
-              await rusqlite.close();
-              setOpenDatabase(false);
-              setList([]);
-              setId(-1);
-            }}
+          <form
+            onSubmit={closeDatabase}
           >
             <button type="submit" disabled={!openDatabase}>Close</button>
           </form>
