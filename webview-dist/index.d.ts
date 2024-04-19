@@ -6,7 +6,7 @@ export default class Rusqlite {
     migration(migrations: Migration[]): Promise<void>;
     update(sql: string, parameters: Map<string, any>): Promise<void>;
     select(sql: string, parameters: Map<string, any>): Promise<any[]>;
-    batch(batchSql: string): Promise<void>;
+    batch(sql: string): Promise<void>;
     close(): Promise<void>;
 }
 export interface Migration {
