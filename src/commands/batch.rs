@@ -33,4 +33,20 @@ mod tests {
 
         assert!(rows.next().unwrap().is_none());
     }
+
+    #[test]
+    fn execute_batch_drop_table_test() {
+        let connection = Connection::open_in_memory().unwrap();
+        let create_table_sql = r#"
+            CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+            INSERT INTO users (name) VALUES ('Alice');
+            "#
+        .to_string();
+        let result = execute_batch(&connection, create_table_sql);
+        assert!(result.is_ok());
+
+        let drop_table_sql = "DROP TABLE users;".to_string();
+        let result = execute_batch(&connection, drop_table_sql);
+        assert!(result.is_ok());
+    }
 }

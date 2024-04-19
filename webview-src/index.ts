@@ -27,8 +27,8 @@ export default class Rusqlite {
     return await invoke('plugin:rusqlite|select', {name: this.name, sql, parameters});
   }
 
-  async batch(batchSql: string): Promise<void> {
-    return await invoke('plugin:rusqlite|batch', {name: this.name, batch_sql: batchSql});
+  async batch(sql: string): Promise<void> {
+    return await invoke('plugin:rusqlite|batch', {name: this.name, sql});
   }
 
   async close(): Promise<void> {

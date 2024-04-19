@@ -101,14 +101,14 @@ async fn select(
 }
 
 #[command]
-async fn batch(state: State<'_, ConfigState>, name: String, batch_sql: String) -> Result<()> {
+async fn batch(state: State<'_, ConfigState>, name: String, sql: String) -> Result<()> {
     let connections = state.0.lock().unwrap();
     let connection = match connections.get(&name) {
         Some(connection) => connection,
         None => return Err(Error::Connection()),
     };
 
-    execute_batch(connection, batch_sql)
+    execute_batch(connection, sql)
 }
 
 #[command]
