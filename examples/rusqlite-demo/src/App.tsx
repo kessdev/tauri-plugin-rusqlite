@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
 import Rusqlite from 'tauri-plugin-rusqlite-api'
-import { rusqliteOpenInMemory, rusqliteOpenInPath } from "./Database";
+import { rusqliteClose, rusqliteOpenInMemory, rusqliteOpenInPath } from "./Database";
 import { appDataDir, resolve } from "@tauri-apps/api/path";
 
 function App() {
@@ -10,7 +10,8 @@ function App() {
   const [list, setList] = useState<any>([]);
   const [openDatabase, setOpenDatabase] = useState(false);
   const [rusqlite, setRusqlite] = useState<Rusqlite | null>(null);
-  const [databasePath, setDatabasePath] = useState('');
+  const [openDatabaseMessage, setOpenDatabaseMessage] = useState('');
+  const [dropTableMessage, setDropTableMessage] = useState('');
 
   const openInMemory = async () => {
     try {
@@ -21,6 +22,8 @@ function App() {
       await rusqlite.migration(scripts);
       setOpenDatabase(true);
       setRusqlite(rusqlite);
+      setOpenDatabaseMessage('Memory');
+      setDropTableMessage('');
     } catch (err) {
       console.log(err);
     }
@@ -30,7 +33,7 @@ function App() {
     try {
       const baseFolder = await appDataDir();
       const databasePath = await resolve(baseFolder, "test.db");
-      setDatabasePath(databasePath);
+      setOpenDatabaseMessage(databasePath);
       const rusqlite = await rusqliteOpenInPath(databasePath);
       let scripts = [
         { name: "create_table", sql: "CREATE TABLE test (id INTEGER PRIMARY KEY, integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB)" }
@@ -38,6 +41,7 @@ function App() {
       await rusqlite.migration(scripts);
       setOpenDatabase(true);
       setRusqlite(rusqlite);
+      setDropTableMessage('');
     } catch (err) {
       console.log(err);
     }
@@ -79,6 +83,31 @@ function App() {
       setRusqlite(null);
       setList([]);
       setId(-1);
+      setOpenDatabaseMessage('');
+      setDropTableMessage('');
+      rusqliteClose();
+    }
+  }
+
+  const createTable = async () => {
+    if (rusqlite) {
+      try {
+        await rusqlite.batch("CREATE TABLE test_table (id INTEGER PRIMARY KEY, integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB)");
+        setDropTableMessage('"test_table" created successfully!');
+      } catch (err) {
+        setDropTableMessage(err as string);
+      }
+    }
+  }
+
+  const dropTable = async () => {
+    if (rusqlite) {
+      try {
+        await rusqlite.batch("DROP TABLE test_table");
+        setDropTableMessage('"test_table" dropped successfully!');
+      } catch (err) {
+        setDropTableMessage(err as string);
+      }
     }
   }
 
@@ -87,6 +116,7 @@ function App() {
       <h1>Welcome to Tauri!</h1>
 
       <div className="row">
+
         <a href="https://vitejs.dev" target="_blank">
           <img src="/vite.svg" className="logo vite" alt="Vite logo" />
         </a>
@@ -96,24 +126,32 @@ function App() {
         <a href="https://reactjs.org" target="_blank">
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
+
       </div>
 
       <div className="row">
 
         <div className="column">
           <p>Open Database</p>
-          <button type="button" onClick={openInMemory} >Open In Memory</button>
-          <br></br>
-          <button type="button" onClick={openInPath}>Open In Path</button>
-          <br></br>
-          <span>Open in: {databasePath}</span>
+          <button type="button" onClick={openInMemory} >Open In Memory</button><br />
+          <button type="button" onClick={openInPath}>Open In Path</button><br />
+          <span>{ openDatabaseMessage ? `Open in: ${openDatabaseMessage}` : '' }</span>
         </div>
 
         <div className="column">
+          <p>Create and drop table</p>
+          <button type="button" disabled={!openDatabase} onClick={createTable}>Create table</button><br />
+          <button type="button" disabled={!openDatabase} onClick={dropTable}>Drop table</button><br />
+          <span>{dropTableMessage}</span>
+        </div>
+
+      </div>
+
+      <div className="row">
+
+        <div className="column">
           <p>Add data</p>
-          <form
-            onSubmit={addData}
-          >
+          <form onSubmit={addData} >
             <input type="text" placeholder="Integer" name="integer_value" disabled={!openDatabase} /> <br />
             <input type="text" placeholder="Real" name="real_value" disabled={!openDatabase} /> <br />
             <input type="text" placeholder="Text" name="text_value" disabled={!openDatabase} /> <br />
@@ -125,18 +163,14 @@ function App() {
 
         <div className="column">
           <p>Show data</p>
-          <form
-            onSubmit={showData}
-          >
+          <form onSubmit={showData} >
             <button type="submit" disabled={!openDatabase}>Select</button>
           </form>
         </div>
 
         <div className="column">
           <p>Close Database</p>
-          <form
-            onSubmit={closeDatabase}
-          >
+          <form onSubmit={closeDatabase} >
             <button type="submit" disabled={!openDatabase}>Close</button>
           </form>
         </div>
@@ -144,6 +178,7 @@ function App() {
       </div>
 
       <div className="row">
+
         <table>
           <thead>
             <tr>
@@ -166,6 +201,7 @@ function App() {
             ))}
           </tbody>
         </table>
+
       </div>
     </div>
   );
