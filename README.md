@@ -77,6 +77,11 @@ await database.batch(
     "CREATE TABLE test (id INTEGER PRIMARY KEY, integer_value INTEGER, real_value REAL, text_value TEXT, blob_value BLOB); CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL);");
 ```
 
+### Drop table
+``` ts
+await database.batch("DROP TABLE test;");
+```
+
 ### Insert or Update
 
 ``` ts
@@ -93,6 +98,13 @@ new Map([
 
 ``` ts
 let result = await database.select("SELECT * FROM test", new Map());
+...
+result.map((item) => {
+    return {
+        id: item.id,
+        ...
+    };
+});
 ```
 
 ### Close database
