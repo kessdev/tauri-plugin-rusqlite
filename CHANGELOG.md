@@ -1,5 +1,13 @@
 # Changelog
 
+## \[0.4.3]
+
+- [`13757b7`](https://www.github.com/kessdev/tauri-plugin-rusqlite/commit/13757b7980e17032f81c9aa0cd594371d86c9372) Fix batch command
+
+### Dependencies
+
+- Upgraded to `tauri-plugin-rusqlite@0.4.3`
+
 ## \[0.4.2]
 
 - [`13757b7`](https://www.github.com/kessdev/tauri-plugin-rusqlite/commit/13757b7980e17032f81c9aa0cd594371d86c9372) Refactor select method parameter and documentation.
